@@ -1,0 +1,3 @@
+Changes I made:
+1) Makefile - Rearranged the $(TARGET): line to have the LDFLAGS at the end.
+2) Makefile - Added -lGLEW to the LDFLAGS
