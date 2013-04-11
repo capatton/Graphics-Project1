@@ -1,6 +1,8 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "vec.h"
+#include "Angel.h"
+#include "InitShader.cpp"
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -10,23 +12,23 @@ using namespace std;
 
 typedef vec2 point;
 // vertex shader
-const GLchar* vert =
-"#version 120\n"
-"attribute vec2 position;"
-"void main()"
-"{"
-"   gl_Position = vec4( position, 0.0, 1.0 );"
-"}"
-;
+// const GLchar* vert =
+// "#version 120\n"
+// "attribute vec2 position;"
+// "void main()"
+// "{"
+// "   gl_Position = vec4( position, 0.0, 1.0 );"
+// "}"
+// ;
 
 // fragment shader
-const GLchar* frag = 
-"#version 120\n"
-"void main()"
-"{"
-"    gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );"
-"}"
-;
+// const GLchar* frag = 
+// "#version 120\n"
+// "void main()"
+// "{"
+// "    gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );"
+// "}"
+// ;
 
 const unsigned int numPoints = 4;//was 4
 const unsigned int numDivisions = 5;
@@ -98,7 +100,7 @@ void CheckStatus( const GLenum id )
     if( glIsProgram(id) ) { 
         glGetProgramInfoLog( id, loglen, NULL, &log[0] );
     }
-    
+
     throw logic_error( string( log.begin(), log.end() ) ); 
 }
 
@@ -110,20 +112,6 @@ GLuint CreateShader( const GLenum aType, const string& aSource )
     glCompileShader( shader );
     CheckStatus( shader );
     return shader;
-}
-
-GLuint CreateProgram( const string& aVertexShader, const string& aFragmentShader )
-{
-    GLuint vert = CreateShader( GL_VERTEX_SHADER, aVertexShader );
-    GLuint frag = CreateShader( GL_FRAGMENT_SHADER, aFragmentShader );
-    GLuint program = glCreateProgram();
-    glAttachShader( program, vert );
-    glAttachShader( program, frag );
-    glLinkProgram( program );
-    glDeleteShader( vert );
-    glDeleteShader( frag );
-    CheckStatus( program );
-    return program;
 }
 
 GLuint prog = 0;
@@ -140,11 +128,8 @@ void init()
     cout << "GLEW_VERSION : " << glewGetString(GLEW_VERSION) << endl;
     cout << "GLSL VERSION : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 
-    if( !GLEW_VERSION_2_1 )
-        throw runtime_error( "OpenGL 2.1 or better required for GLSL support." ); 
-
     // load shaders
-    prog = CreateProgram( vert, frag );
+    prog = InitShader( "../vsource.glsl", "../fsource.glsl" );
 
     //Inicializamos array global
     divide_triangle
@@ -185,7 +170,8 @@ int main(int argc, char **argv)
 {
     glutInit( &argc, argv );
     glutInitWindowSize( 800,600 );
-    glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
+   glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
+   // glutInitDisplayMode(GLUT_3_2_CORE_PROFILE | GLUT_RGBA);
     glutCreateWindow( "Sierpinski gasket" );
     init();
     glutDisplayFunc( display );

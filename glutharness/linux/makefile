@@ -3,7 +3,7 @@ TARGET   = glutharness
 CC       = g++
 CFLAGS   = -c -g -DDEBUG -DLINUX
 LDFLAGS  = -lGL -lGLU -lglut -lGLEW
-SRC      = $(wildcard ../*.cpp)
+SRC      = $(wildcard ../main.cpp ../*.cpp)
 OBJ      = $(SRC:.cpp=.o)
 
 all: $(TARGET)
