@@ -11,24 +11,19 @@
 using namespace std;
 
 typedef vec2 point;
-// vertex shader
-// const GLchar* vert =
-// "#version 120\n"
-// "attribute vec2 position;"
-// "void main()"
-// "{"
-// "   gl_Position = vec4( position, 0.0, 1.0 );"
-// "}"
-// ;
 
-// fragment shader
-// const GLchar* frag = 
-// "#version 120\n"
-// "void main()"
-// "{"
-// "    gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );"
-// "}"
-// ;
+typedef struct RGBAColor {
+    GLubyte r, g, b, a;
+} RGBAColor;
+
+enum colors {
+    RED,
+    GREEN,
+    BLUE
+};
+
+int colorToShow = 0;
+
 
 const unsigned int numPoints = 4;//was 4
 const unsigned int numDivisions = 5;
@@ -74,69 +69,19 @@ void divide_triangle( vec2 a, vec2 b, vec2 c, GLint k, vector<vec2> &points )
     }
 }
 
-void CheckStatus( const GLenum id )
-{
-    GLint status = GL_FALSE, loglen = 10;
-    if( glIsShader(id) ) {
-        glGetShaderiv( id, GL_COMPILE_STATUS, &status );
-    } 
-    if( glIsProgram(id) )  {
-        glGetProgramiv( id, GL_LINK_STATUS, &status );
-    }
-
-    if( GL_TRUE == status ) {
-        return;
-    }
-    if( glIsShader(id) ) {
-        glGetShaderiv( id, GL_INFO_LOG_LENGTH , &loglen);
-    } 
-    if( glIsProgram(id) ) { 
-        glGetProgramiv( id, GL_INFO_LOG_LENGTH , &loglen);
-    }
-    vector< char > log( loglen, 'E' );
-    if( glIsShader(id) )  { 
-        glGetShaderInfoLog( id, loglen, NULL, &log[0] );
-    }
-    if( glIsProgram(id) ) { 
-        glGetProgramInfoLog( id, loglen, NULL, &log[0] );
-    }
-
-    throw logic_error( string( log.begin(), log.end() ) ); 
-}
-
-GLuint CreateShader( const GLenum aType, const string& aSource )
-{
-    GLuint shader = glCreateShader( aType );
-    const GLchar* shaderString = aSource.c_str();
-    glShaderSource( shader, 1, &shaderString, NULL );
-    glCompileShader( shader );
-    CheckStatus( shader );
-    return shader;
-}
-
 GLuint prog = 0;
 GLuint vbo = 0;
 void init()
 {
-    GLenum glewError = glewInit();
-    if( GLEW_OK != glewError )
-        throw runtime_error( (char*)glewGetErrorString(glewError) );
-
-    cout << "GL_VERSION   : " << glGetString(GL_VERSION) << endl;
-    cout << "GL_VENDOR    : " << glGetString(GL_VENDOR) << endl;
-    cout << "GL_RENDERER  : " << glGetString(GL_RENDERER) << endl;    
-    cout << "GLEW_VERSION : " << glewGetString(GLEW_VERSION) << endl;
-    cout << "GLSL VERSION : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-
-    // load shaders
+    glewInit();
     prog = InitShader( "../vsource.glsl", "../fsource.glsl" );
-
-    //Inicializamos array global
+    
+    //Init the global array
     divide_triangle
         (
-        vec2(0.0,0.0),
-        vec2(1.0,0.0),
-        vec2(0.5,1.0),
+        vec2(-0.5, -0.5),
+        vec2(0.5,-0.5),
+        vec2(0.0,0.5),
         Global::Ndivisions,
         Global::points
         );
@@ -152,10 +97,22 @@ void display(void)
 {
     glClear( GL_COLOR_BUFFER_BIT );
 
+    if (colorToShow == RED){
+        glColor3f(1.0f,0.0f,0.0f);      
+    }
+    else if (colorToShow == GREEN) {
+        glColor3f(0.0f,1.0f,0.0f);      
+    }
+    else if (colorToShow == BLUE) {
+        glColor3f(0.0f,0.0f,1.0f);      
+
+    }
+
     glUseProgram( prog );
 
     GLint position_loc = glGetAttribLocation( prog, "position" );
     glBindBuffer( GL_ARRAY_BUFFER, vbo );
+
     glVertexAttribPointer( position_loc, 2, GL_FLOAT, GL_FALSE, sizeof( vec2 ), 0 );
     glEnableVertexAttribArray( position_loc );
 
@@ -166,15 +123,31 @@ void display(void)
     glutSwapBuffers();
 }
 
+void keyPressHandler(unsigned char key, int x, int y)
+{
+    switch (key){
+        case 'Q':
+        case 'q':
+            exit(0);
+        case 'C':
+        case 'c':
+            ++colorToShow;
+            colorToShow %= 3;
+            display();
+            break;
+    }
+}
+
+
 int main(int argc, char **argv)
 {
     glutInit( &argc, argv );
-    glutInitWindowSize( 800,600 );
-   glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
-   // glutInitDisplayMode(GLUT_3_2_CORE_PROFILE | GLUT_RGBA);
+    glutInitWindowSize( 500,600 );
+    glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
     glutCreateWindow( "Sierpinski gasket" );
     init();
     glutDisplayFunc( display );
+    glutKeyboardFunc(keyPressHandler);
     glutMainLoop();
     return 0;
 }

@@ -1,3 +1,10 @@
-Changes I made:
-1) Makefile - Rearranged the $(TARGET): line to have the LDFLAGS at the end.
-2) Makefile - Added -lGLEW to the LDFLAGS
+Running instructions:
+On Ubuntu (Linux Mint, in my case)
+To run my code, enter the "linux" directory and type "make".  Then, from the same directory, type "./glutharness".
+To close the window, press 'q' or 'Q'
+To change the color of the display, press 'c' or 'C'
+
+What I implemented (EXTRA CREDIT):
+My code has all the required functionality, plus the first two extra credit pieces: "Implement application based
+color variable" and "Implement a method where the keyboard is used to change the color".  To test, run the program
+and press 'c' or 'C'
